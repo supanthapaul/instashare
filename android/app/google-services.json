@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "67517408390",
+    "project_id": "instashare-7321d",
+    "storage_bucket": "instashare-7321d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:67517408390:android:58241690df8db61a59dd07",
+        "android_client_info": {
+          "package_name": "com.supanthapaul.instashare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "67517408390-eg1p1jg6mca9i8jhbi8df4k4o6ruvstt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.supanthapaul.instashare",
+            "certificate_hash": "c0c478e94237f8bb15d49c99e4deedf8e88a94d7"
+          }
+        },
+        {
+          "client_id": "67517408390-eb0mnccb3v9pp7en6quc3on21kaaclpt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSs3v_tvKVOsKDl2wF9JPuhRq1W9Da4KU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "67517408390-eb0mnccb3v9pp7en6quc3on21kaaclpt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
