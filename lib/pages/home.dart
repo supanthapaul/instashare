@@ -1,13 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:instashare/models/user.dart';
 import 'package:instashare/pages/activity_feed.dart';
+import 'package:instashare/pages/create_account.dart';
 import 'package:instashare/pages/profile.dart';
 import 'package:instashare/pages/search.dart';
 import 'package:instashare/pages/timeline.dart';
 import 'package:instashare/pages/upload.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
+final usersRef = Firestore.instance.collection("users");
+final DateTime timestamp = DateTime.now();
+User currentUser;
 
 class Home extends StatefulWidget {
   @override
@@ -46,7 +52,7 @@ class _HomeState extends State<Home> {
 
   handleSignIn(GoogleSignInAccount account) {
     if (account != null) {
-      print("USer signed in! $account");
+      createUserInFirestore();
       setState(() {
         isAuth = true;
       });
@@ -55,6 +61,37 @@ class _HomeState extends State<Home> {
         isAuth = false;
       });
     }
+  }
+
+  createUserInFirestore() async {
+    final GoogleSignInAccount user = googleSignIn.currentUser;
+    DocumentSnapshot doc = await usersRef.document(user.id).get();
+
+    if (!doc.exists) {
+      // if the user doesn't exist, take them to the create account page to get the username
+      final username = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => CreateAccount()),
+      );
+
+      // use the username to create a new user in users collection
+      usersRef.document(user.id).setData({
+        "id": user.id,
+        "username": username,
+        "photoUrl": user.photoUrl,
+        "email": user.email,
+        "displayName": user.displayName,
+        "bio": "",
+        "timestamp": timestamp,
+      });
+
+      // refetch the user data
+      doc = await usersRef.document(user.id).get();
+    }
+
+    currentUser = User.fromDocument(doc);
+    print(currentUser);
+    print(currentUser.displayName);
   }
 
   login() {
@@ -82,7 +119,14 @@ class _HomeState extends State<Home> {
   Scaffold buildAuthScreen() {
     return Scaffold(
       body: PageView(
-        children: [Timeline(), ActivityFeed(), Upload(), Search(), Profile()],
+        children: [
+          // Timeline(),
+          ElevatedButton(onPressed: logout, child: Text("Logout")),
+          ActivityFeed(),
+          Upload(),
+          Search(),
+          Profile(),
+        ],
         controller: pageController,
         onPageChanged: onPageChanged,
         physics: NeverScrollableScrollPhysics(),
