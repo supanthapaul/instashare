@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:instashare/widgets/header.dart';
 import 'package:instashare/widgets/progress.dart';
 
-final usersRef = Firestore.instance.collection("users");
+final usersRef = FirebaseFirestore.instance.collection("users");
 
 class Timeline extends StatefulWidget {
   @override
@@ -36,7 +36,7 @@ class _TimelineState extends State<Timeline> {
           }
           return Container(
             child: ListView(
-              children: snapshot.data.documents
+              children: snapshot.data.docs
                   .map((doc) => Text(doc['username']))
                   .toList(),
             ),

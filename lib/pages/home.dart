@@ -11,7 +11,8 @@ import 'package:instashare/pages/timeline.dart';
 import 'package:instashare/pages/upload.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
-final usersRef = Firestore.instance.collection("users");
+final usersRef = FirebaseFirestore.instance.collection("users");
+
 final DateTime timestamp = DateTime.now();
 User currentUser;
 
@@ -65,7 +66,7 @@ class _HomeState extends State<Home> {
 
   createUserInFirestore() async {
     final GoogleSignInAccount user = googleSignIn.currentUser;
-    DocumentSnapshot doc = await usersRef.document(user.id).get();
+    DocumentSnapshot doc = await usersRef.doc(user.id).get();
 
     if (!doc.exists) {
       // if the user doesn't exist, take them to the create account page to get the username
@@ -75,7 +76,7 @@ class _HomeState extends State<Home> {
       );
 
       // use the username to create a new user in users collection
-      usersRef.document(user.id).setData({
+      usersRef.doc(user.id).set({
         "id": user.id,
         "username": username,
         "photoUrl": user.photoUrl,
@@ -86,7 +87,7 @@ class _HomeState extends State<Home> {
       });
 
       // refetch the user data
-      doc = await usersRef.document(user.id).get();
+      doc = await usersRef.doc(user.id).get();
     }
 
     currentUser = User.fromDocument(doc);
