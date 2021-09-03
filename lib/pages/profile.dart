@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:instashare/models/user.dart';
+import 'package:instashare/pages/edit_profile.dart';
 import 'package:instashare/pages/home.dart';
 import 'package:instashare/widgets/header.dart';
 import 'package:instashare/widgets/progress.dart';
@@ -14,6 +16,8 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final String currentUserId = currentUser?.id;
+
   buildCountColumn(String label, int count) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -38,11 +42,45 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  buildProfileButton() {
-    return ElevatedButton(
-      onPressed: () {},
-      child: Text("Edit Profile"),
+  editProfile() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EditProfile(
+            currentUserId: currentUserId,
+          ),
+        ));
+  }
+
+  buildButton({String text, Function onCLick}) {
+    return Container(
+      padding: EdgeInsets.only(top: 2),
+      child: TextButton(
+        onPressed: onCLick,
+        child: Container(
+          width: 250,
+          height: 27,
+          child: Text(
+            text,
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+              color: Colors.blue,
+              border: Border.all(
+                color: Colors.blue,
+              ),
+              borderRadius: BorderRadius.circular(5)),
+        ),
+      ),
     );
+  }
+
+  buildProfileButton() {
+    bool isProfileOwner = currentUserId == widget.profileId;
+    if (isProfileOwner) {
+      return buildButton(text: "Edit Profile", onCLick: editProfile);
+    }
   }
 
   buildProfileHeader() {
