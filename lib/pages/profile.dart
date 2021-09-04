@@ -5,6 +5,7 @@ import 'package:instashare/models/user.dart';
 import 'package:instashare/pages/edit_profile.dart';
 import 'package:instashare/pages/home.dart';
 import 'package:instashare/widgets/header.dart';
+import 'package:instashare/widgets/post.dart';
 import 'package:instashare/widgets/progress.dart';
 
 class Profile extends StatefulWidget {
@@ -17,6 +18,34 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   final String currentUserId = currentUser?.id;
+  bool isLoading = false;
+  int postCount = 0;
+  List<Post> posts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getProfilePosts();
+  }
+
+  getProfilePosts() async {
+    setState(() {
+      isLoading = true;
+    });
+    // Get all user posts
+    QuerySnapshot snapshot = await postsRef
+        .doc(widget.profileId)
+        .collection('userPosts')
+        .orderBy('timestamp', descending: true)
+        .get();
+    // set posts to state
+    setState(() {
+      isLoading = false;
+      postCount = snapshot.docs.length;
+      print(snapshot.docs);
+      posts = snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
+    });
+  }
 
   buildCountColumn(String label, int count) {
     return Column(
@@ -110,7 +139,7 @@ class _ProfileState extends State<Profile> {
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            buildCountColumn("Posts", 0),
+                            buildCountColumn("Posts", postCount),
                             buildCountColumn("Followers", 0),
                             buildCountColumn("Following", 0),
                           ],
@@ -156,12 +185,27 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  buildProfilePosts() {
+    if (isLoading) {
+      return circularProgress();
+    }
+    return Column(
+      children: posts,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: header(context, titleText: "Profile"),
       body: ListView(
-        children: [buildProfileHeader()],
+        children: [
+          buildProfileHeader(),
+          Divider(
+            height: 0.0,
+          ),
+          buildProfilePosts(),
+        ],
       ),
     );
   }
