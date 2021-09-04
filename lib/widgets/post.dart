@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:instashare/models/user.dart';
 import 'package:instashare/pages/home.dart';
+import 'package:instashare/widgets/custom_image.dart';
 import 'package:instashare/widgets/progress.dart';
 
 class Post extends StatefulWidget {
@@ -117,7 +118,7 @@ class _PostState extends State<Post> {
       onDoubleTap: () => print("Liking"),
       child: Stack(
         alignment: Alignment.center,
-        children: [Image.network(mediaUrl)],
+        children: [cachedNetworkImage(mediaUrl)],
       ),
     );
   }

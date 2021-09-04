@@ -1,11 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:instashare/models/user.dart';
 import 'package:instashare/pages/edit_profile.dart';
 import 'package:instashare/pages/home.dart';
 import 'package:instashare/widgets/header.dart';
 import 'package:instashare/widgets/post.dart';
+import 'package:instashare/widgets/post_tile.dart';
 import 'package:instashare/widgets/progress.dart';
 
 class Profile extends StatefulWidget {
@@ -18,6 +20,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   final String currentUserId = currentUser?.id;
+  String postOrientation = "grid";
   bool isLoading = false;
   int postCount = 0;
   List<Post> posts = [];
@@ -188,9 +191,85 @@ class _ProfileState extends State<Profile> {
   buildProfilePosts() {
     if (isLoading) {
       return circularProgress();
+    } else if (posts.isEmpty) {
+      // NO POSTS IMAGE
+      return Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 15.0),
+              child: SvgPicture.asset(
+                'assets/images/no_content.svg',
+                height: 120,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 15.0),
+              child: Text(
+                "No Posts",
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.0,
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+    } else if (postOrientation == "grid") {
+      // GRID TILES POSTS
+      List<GridTile> gridTiles = [];
+      posts.forEach((post) {
+        gridTiles.add(GridTile(child: PostTile(post)));
+      });
+      return GridView.count(
+        crossAxisCount: 3,
+        childAspectRatio: 1.0,
+        mainAxisSpacing: 1.5,
+        crossAxisSpacing: 1.5,
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        children: gridTiles,
+      );
+    } else if (postOrientation == 'list') {
+      // LIST OF POSTS
+      return Column(
+        children: posts,
+      );
     }
-    return Column(
-      children: posts,
+  }
+
+  setPostOrientation(String orientation) {
+    setState(() {
+      postOrientation = orientation;
+    });
+  }
+
+  buildTogglePostOrientation() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        IconButton(
+          onPressed: () => setPostOrientation("grid"),
+          icon: Icon(
+            Icons.grid_on,
+            color: postOrientation == "grid"
+                ? Theme.of(context).primaryColor
+                : Colors.grey,
+          ),
+        ),
+        IconButton(
+          onPressed: () => setPostOrientation("list"),
+          icon: Icon(
+            Icons.list,
+            color: postOrientation == "list"
+                ? Theme.of(context).primaryColor
+                : Colors.grey,
+          ),
+        ),
+      ],
     );
   }
 
@@ -201,6 +280,8 @@ class _ProfileState extends State<Profile> {
       body: ListView(
         children: [
           buildProfileHeader(),
+          Divider(),
+          buildTogglePostOrientation(),
           Divider(
             height: 0.0,
           ),
