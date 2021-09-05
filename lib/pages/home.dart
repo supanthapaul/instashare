@@ -15,8 +15,9 @@ final GoogleSignIn googleSignIn = GoogleSignIn();
 final Reference storageRef = FirebaseStorage.instance.ref();
 final usersRef = FirebaseFirestore.instance.collection("users");
 final postsRef = FirebaseFirestore.instance.collection("posts");
+final commentsRef = FirebaseFirestore.instance.collection("comments");
 
-final DateTime timestamp = DateTime.now();
+DateTime timestamp() => DateTime.now();
 User currentUser;
 
 class Home extends StatefulWidget {
@@ -86,7 +87,7 @@ class _HomeState extends State<Home> {
         "email": user.email,
         "displayName": user.displayName,
         "bio": "",
-        "timestamp": timestamp,
+        "timestamp": timestamp(),
       });
 
       // refetch the user data
