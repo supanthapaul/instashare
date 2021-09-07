@@ -67,6 +67,20 @@ class CommentsState extends State<Comments> {
       "avatarUrl": currentUser.photoUrl,
       "userId": currentUser.id
     });
+
+    if (postOwnerId != currentUser.id) {
+      // add comment notification to activity feed
+      activityFeedRef.doc(postOwnerId).collection('feedItems').add({
+        "type": "comment",
+        "commentData": commentController.text,
+        "username": currentUser.username,
+        "userId": currentUser.id,
+        "userProfileImage": currentUser.photoUrl,
+        "postId": postId,
+        "mediaUrl": postMediaUrl,
+        "timestamp": timestamp()
+      });
+    }
     commentController.clear();
   }
 

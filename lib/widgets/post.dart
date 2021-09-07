@@ -131,6 +131,8 @@ class _PostState extends State<Post> {
           .collection('userPosts')
           .doc(postId)
           .update({'likes.$currentUserId': false});
+      // remove like notification from activity feed
+      removeLikeFromActivityFeed();
       // unlike the post in state
       setState(() {
         likeCount--;
@@ -144,6 +146,8 @@ class _PostState extends State<Post> {
           .collection('userPosts')
           .doc(postId)
           .update({'likes.$currentUserId': true});
+      // add like notification to activity feed
+      addLikeToActivityFeed();
       // like the post in state
       setState(() {
         likeCount++;
@@ -159,6 +163,40 @@ class _PostState extends State<Post> {
         });
       });
     }
+  }
+
+  // add like notification to activity feed
+  addLikeToActivityFeed() {
+    // add the notification only if the notification is made by other users, not our selves
+    if (ownerId == currentUserId) return;
+
+    activityFeedRef.doc(ownerId).collection('feedItems').doc(postId).set({
+      "type": "like",
+      "username": currentUser.username,
+      "userId": currentUser.id,
+      "userProfileImage": currentUser.photoUrl,
+      "postId": postId,
+      "mediaUrl": mediaUrl,
+      "commentData": "",
+      "timestamp": timestamp()
+    });
+  }
+
+  // remove like notification from activity feed
+  removeLikeFromActivityFeed() {
+    // remove the notification only if the notification is made by other users, not our selves
+    if (ownerId == currentUserId) return;
+
+    activityFeedRef
+        .doc(ownerId)
+        .collection('feedItems')
+        .doc(postId)
+        .get()
+        .then((doc) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    });
   }
 
   GestureDetector buildPostImage() {
