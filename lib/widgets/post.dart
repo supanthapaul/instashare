@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:instashare/models/user.dart';
+import 'package:instashare/pages/activity_feed.dart';
 import 'package:instashare/pages/comments.dart';
 import 'package:instashare/pages/home.dart';
 import 'package:instashare/widgets/custom_image.dart';
@@ -101,7 +102,7 @@ class _PostState extends State<Post> {
             backgroundImage: CachedNetworkImageProvider(user.photoUrl),
           ),
           title: GestureDetector(
-            onTap: () => print("Showing profile"),
+            onTap: () => showProfile(context, profileId: user.id),
             child: Text(
               user.username,
               style: TextStyle(
