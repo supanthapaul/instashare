@@ -18,6 +18,7 @@ final postsRef = FirebaseFirestore.instance.collection("posts");
 final commentsRef = FirebaseFirestore.instance.collection("comments");
 final followersRef = FirebaseFirestore.instance.collection("followers");
 final followingRef = FirebaseFirestore.instance.collection("following");
+final timelineRef = FirebaseFirestore.instance.collection("timeline");
 final activityFeedRef = FirebaseFirestore.instance.collection("feed");
 
 DateTime timestamp() => DateTime.now();
@@ -58,9 +59,9 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  handleSignIn(GoogleSignInAccount account) {
+  handleSignIn(GoogleSignInAccount account) async {
     if (account != null) {
-      createUserInFirestore();
+      await createUserInFirestore();
       setState(() {
         isAuth = true;
       });
@@ -128,7 +129,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       body: PageView(
         children: [
-          Timeline(),
+          Timeline(currentUser: currentUser),
           ActivityFeed(),
           Upload(currentUser: currentUser),
           Search(),
