@@ -22,15 +22,21 @@ class _ProfileState extends State<Profile> {
   bool isFollowing = false;
   final String currentUserId = currentUser?.id;
   String postOrientation = "grid";
-  bool isLoading = false;
+  bool isLoading = false, isUserLoading = false;
   int postCount = 0;
   int followerCount = 0;
   int followingCount = 0;
   List<Post> posts = [];
+  User user;
 
   @override
   void initState() {
     super.initState();
+    getProfileData();
+  }
+
+  getProfileData() async {
+    getUserData();
     getProfilePosts();
     getFollowers();
     getFollowing();
@@ -45,6 +51,18 @@ class _ProfileState extends State<Profile> {
         .get();
     setState(() {
       isFollowing = doc.exists;
+    });
+  }
+
+  getUserData() async {
+    setState(() {
+      isUserLoading = true;
+    });
+    DocumentSnapshot doc = await usersRef.doc(widget.profileId).get();
+
+    setState(() {
+      isUserLoading = false;
+      user = User.fromDocument(doc);
     });
   }
 
@@ -236,75 +254,70 @@ class _ProfileState extends State<Profile> {
   }
 
   buildProfileHeader() {
-    return FutureBuilder(
-      future: usersRef.doc(widget.profileId).get(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return circularProgress();
-        }
-        User user = User.fromDocument(snapshot.data);
-        return Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
+    if (isUserLoading) {
+      return circularProgress();
+    }
+
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.grey,
-                    backgroundImage: CachedNetworkImageProvider(user.photoUrl),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Column(
+              CircleAvatar(
+                radius: 40,
+                backgroundColor: Colors.grey,
+                backgroundImage: CachedNetworkImageProvider(user.photoUrl),
+              ),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            buildCountColumn("Posts", postCount),
-                            buildCountColumn("Followers", followerCount),
-                            buildCountColumn("Following", followingCount),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            buildProfileButton(),
-                          ],
-                        )
+                        buildCountColumn("Posts", postCount),
+                        buildCountColumn("Followers", followerCount),
+                        buildCountColumn("Following", followingCount),
                       ],
                     ),
-                  )
-                ],
-              ),
-              Container(
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.only(top: 12),
-                child: Text(
-                  '@' + user.username,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-              ),
-              Container(
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.only(top: 4),
-                child: Text(
-                  user.displayName,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              Container(
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.only(top: 4),
-                child: Text(
-                  user.bio,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        buildProfileButton(),
+                      ],
+                    )
+                  ],
                 ),
               )
             ],
           ),
-        );
-      },
+          Container(
+            alignment: Alignment.centerLeft,
+            padding: EdgeInsets.only(top: 12),
+            child: Text(
+              '@' + user.username,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            padding: EdgeInsets.only(top: 4),
+            child: Text(
+              user.displayName,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            padding: EdgeInsets.only(top: 4),
+            child: Text(
+              user.bio,
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -397,16 +410,19 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: header(context, titleText: "Profile"),
-      body: ListView(
-        children: [
-          buildProfileHeader(),
-          Divider(),
-          buildTogglePostOrientation(),
-          Divider(
-            height: 0.0,
-          ),
-          buildProfilePosts(),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () => getProfileData(),
+        child: ListView(
+          children: [
+            buildProfileHeader(),
+            Divider(),
+            buildTogglePostOrientation(),
+            Divider(
+              height: 0.0,
+            ),
+            buildProfilePosts(),
+          ],
+        ),
       ),
     );
   }
